@@ -3,116 +3,99 @@
  * https://github.com/facebook/react-native
  */
 'use strict';
-
-var React = require('react-native');
-var {
+import React, {
   AppRegistry,
-  Image,
-  ListView,
+  Component,
   StyleSheet,
   Text,
   View,
-} = React;
-
-var API_KEY = '7waqfqbprs7pajbz28mqf6vz';
-var API_URL = 'http://api.rottentomatoes.com/api/public/v1.0/lists/movies/in_theaters.json';
-var PAGE_SIZE = 25;
-var PARAMS = '?apikey=' + API_KEY + '&page_limit=' + PAGE_SIZE;
-var REQUEST_URL = API_URL + PARAMS;
-
-var helloWorld = React.createClass({
-  getInitialState: function() {
-    return {
-      dataSource: new ListView.DataSource({
-        rowHasChanged: (row1, row2) => row1 !== row2,
-      }),
-      loaded: false,
+  TabBarIOS,
+} from 'react-native';
+ 
+class helloWorld extends Component {
+  constructor(props){
+    super(props);
+    this.state={
+         selectedTab: '历史',
+       notifCount: 0,
+       presses: 0,
     };
-  },
-
-  componentDidMount: function() {
-    this.fetchData();
-  },
-
-  fetchData: function() {
-    fetch(REQUEST_URL)
-      .then((response) => response.json())
-      .then((responseData) => {
-        this.setState({
-          dataSource: this.state.dataSource.cloneWithRows(responseData.movies),
-          loaded: true,
-        });
-      })
-      .done();
-  },
-
-  render: function() {
-    if (!this.state.loaded) {
-      return this.renderLoadingView();
-    }
-
+  }
+  //进行渲染页面内容
+  _renderContent(color: string, pageText: string, num?: number) {
     return (
-      <ListView
-        dataSource={this.state.dataSource}
-        renderRow={this.renderMovie}
-        style={styles.listView}
-      />
+      <View style={[styles.tabContent, {backgroundColor: color}]}>
+        <Text style={styles.tabText}>{pageText}</Text>
+        <Text style={styles.tabText}>第 {num} 次重复渲染{pageText}</Text>
+      </View>
     );
-  },
-
-  renderLoadingView: function() {
+  }
+  render() {
     return (
-      <View style={styles.container}>
-        <Text>
-          Loading movies...
+      <View style={{flex:1}}>
+        <Text style={styles.welcome}>
+          TabBarIOS使用实例
         </Text>
+        <TabBarIOS
+        style={{flex:1,alignItems:"flex-end"}}
+        tintColor="white"
+        barTintColor="darkslateblue">
+        <TabBarIOS.Item
+          title="自定义"
+          systemIcon="history"
+          selected={this.state.selectedTab === '自定义'}
+          onPress={() => {
+            this.setState({
+              selectedTab: '自定义',
+            });
+          }}
+          >
+          {this._renderContent('#414A8C', '自定义界面')}
+        </TabBarIOS.Item>
+        <TabBarIOS.Item
+          systemIcon="history"
+          selected={this.state.selectedTab === '历史'}
+          badge={this.state.notifCount > 0 ? this.state.notifCount : undefined}
+          onPress={() => {
+            this.setState({
+              selectedTab: '历史',
+              notifCount: this.state.notifCount + 1,
+            });
+          }}
+          >
+          {this._renderContent('#783E33', '历史记录', this.state.notifCount)}
+        </TabBarIOS.Item>
+        <TabBarIOS.Item
+           systemIcon="downloads"
+           selected={this.state.selectedTab === '下载'}
+            onPress={() => {
+            this.setState({
+              selectedTab: '下载',
+              presses: this.state.presses + 1
+            });
+          }}>
+           {this._renderContent('#21551C', '下载页面', this.state.presses)}
+        </TabBarIOS.Item>
+ 
+      </TabBarIOS>
       </View>
     );
-  },
-
-  renderMovie: function(movie) {
-    return (
-      <View style={styles.container}>
-        <Image
-          source={{uri: movie.posters.thumbnail}}
-          style={styles.thumbnail}
-        />
-        <View style={styles.rightContainer}>
-          <Text style={styles.title}>{movie.title}</Text>
-          <Text style={styles.year}>{movie.year}</Text>
-        </View>
-      </View>
-    );
-  },
-});
-
-var styles = StyleSheet.create({
-  container: {
+  }
+}
+const styles = StyleSheet.create({
+  tabContent: {
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
   },
-  rightContainer: {
-    flex: 1,
-  },
-  title: {
+  welcome: {
     fontSize: 20,
-    marginBottom: 8,
     textAlign: 'center',
+    marginTop: 20,
   },
-  year: {
-    textAlign: 'center',
-  },
-  thumbnail: {
-    width: 100,
-    height: 100,
-  },
-  listView: {
-    paddingTop: 20,
-    backgroundColor: '#F5FCFF',
+  tabText: {
+    color: 'white',
+    margin: 50,
   },
 });
-
+ 
 AppRegistry.registerComponent('helloWorld', () => helloWorld);
